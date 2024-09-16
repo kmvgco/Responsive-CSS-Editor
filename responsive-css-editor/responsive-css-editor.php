@@ -1,9 +1,9 @@
 <?php
 /*
 Plugin Name: Responsive CSS Editor
-Description: A CSS editor for Desktop, Tablet, and Mobile views.
-Version: 1.0
-Author: Tyler Thomas (SolutionBuilt)
+Description: A CSS editor for Desktop, Tablet, and Mobile views using CodeMirror.
+Version: 1.1
+Author: Tyler Thomas
 */
 
 // Exit if accessed directly.
@@ -37,12 +37,15 @@ function responsive_css_editor_page() {
                 <li><a href="#mobile-css">Mobile</a></li>
             </ul>
             <div id="desktop-css">
+                <h2>Desktop CSS</h2>
                 <textarea id="desktop-css-code" rows="10" cols="50"><?php echo esc_textarea(get_option('desktop_css')); ?></textarea>
             </div>
             <div id="tablet-css">
+                <h2>Tablet CSS</h2>
                 <textarea id="tablet-css-code" rows="10" cols="50"><?php echo esc_textarea(get_option('tablet_css')); ?></textarea>
             </div>
             <div id="mobile-css">
+                <h2>Mobile CSS</h2>
                 <textarea id="mobile-css-code" rows="10" cols="50"><?php echo esc_textarea(get_option('mobile_css')); ?></textarea>
             </div>
         </div>
@@ -62,12 +65,19 @@ function responsive_css_editor_scripts($hook) {
     // jQuery UI for tabs
     wp_enqueue_script('jquery-ui-tabs');
     wp_enqueue_style('jquery-ui-css', '//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css');
-    
+
+    // CodeMirror dependencies
+    wp_enqueue_script('codemirror-js', 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js', array(), null, true);
+    wp_enqueue_script('codemirror-css-js', 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js', array('codemirror-js'), null, true);
+    wp_enqueue_style('codemirror-css', 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css');
+    wp_enqueue_style('codemirror-theme', 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css');
+
     // Custom JS and CSS
     wp_enqueue_script('responsive-css-editor-js', plugin_dir_url(__FILE__) . 'responsive-css-editor.js', array('jquery'), null, true);
     wp_enqueue_style('responsive-css-editor-css', plugin_dir_url(__FILE__) . 'responsive-css-editor.css');
 }
 
+// AJAX to save the CSS
 add_action('wp_ajax_save_responsive_css', 'save_responsive_css');
 
 function save_responsive_css() {
@@ -80,10 +90,10 @@ function save_responsive_css() {
     if (isset($_POST['mobile_css'])) {
         update_option('mobile_css', sanitize_text_field($_POST['mobile_css']));
     }
-
-    wp_die(); // This is required to terminate immediately and return a response.
+    wp_die();
 }
 
+// Apply the saved CSS in the head of the page
 add_action('wp_head', 'apply_responsive_css');
 
 function apply_responsive_css() {
@@ -93,13 +103,13 @@ function apply_responsive_css() {
 
     echo '<style type="text/css">';
     if ($desktop_css) {
-        echo esc_html($desktop_css);
+        echo $desktop_css;
     }
     if ($tablet_css) {
-        echo '@media (max-width: 768px) {' . esc_html($tablet_css) . '}';
+        echo '@media (max-width: 768px) {' . $tablet_css . '}';
     }
     if ($mobile_css) {
-        echo '@media (max-width: 480px) {' . esc_html($mobile_css) . '}';
+        echo '@media (max-width: 480px) {' . $mobile_css . '}';
     }
     echo '</style>';
 }
