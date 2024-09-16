@@ -11,3 +11,17 @@ textarea {
 .button-primary {
    margin-top: 10px;
 }
+
+.CodeMirror {
+    height: auto;
+    border: 1px solid #ddd;
+    font-size: 14px;
+}
+
+#desktop-css, #tablet-css, #mobile-css {
+    margin-bottom: 20px;
+}
+
+#save-css-button {
+    margin-top: 10px;
+}
